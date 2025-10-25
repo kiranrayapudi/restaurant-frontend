@@ -173,9 +173,9 @@ const DashboardStats = () => {
   return (
     <AppLayout>
       <ToastContainer position="top-right" autoClose={2000} />
-      <Row gutter={[24, 24]}>
+      <Row gutter={[16, 16]}>
         {stats.map((stat, index) => (
-          <Col xs={24} md={8} key={index}>
+          <Col xs={24} sm={12} md={8} key={index}>
             <Card
               bordered={false}
               hoverable
@@ -216,10 +216,11 @@ const DashboardStats = () => {
                     cx="50%"
                     cy="50%"
                     labelLine={false}
-                    outerRadius={110}
+                    outerRadius={90}
                     fill="#8884d8"
                     dataKey="value"
-                    label={({ name, value }) => `${name}: ${value}`}
+                    // Only show value as label
+                    label={({ value }) => value}
                   >
                     {pieData.map((entry, index) => (
                       <Cell
@@ -250,6 +251,7 @@ const DashboardStats = () => {
             dataSource={modalData}
             pagination={{ pageSize: 5 }}
             rowKey="id"
+            scroll={{ x: "max-content", y: 400 }}
           />
         ) : (
           <p style={{ textAlign: "center", marginTop: 20 }}>

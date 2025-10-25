@@ -187,6 +187,7 @@ const BillingAdmin = () => {
                 rowKey="id"
                 pagination={{ pageSize: 5 }}
                 bordered
+                scroll={{ y: 300 }}
               />
             </Card>
           </Col>

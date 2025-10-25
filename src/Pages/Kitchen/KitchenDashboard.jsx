@@ -11,32 +11,29 @@ import {
   Tag,
   Button,
   Space,
+  Drawer,
 } from "antd";
 import {
   OrderedListOutlined,
   DatabaseOutlined,
   LogoutOutlined,
+  MenuOutlined,
 } from "@ant-design/icons";
 import { useSelector, useDispatch } from "react-redux";
 import { fetchOrders, updateOrderStatus } from "../../Redux/Slices/orderSlice";
-import {
-  fetchStock,
-  useIngredients,
-  restockItem,
-} from "../../Redux/Slices/stockSlice";
-import { logout } from "../../Redux/Slices/authSlice"; // ✅ import logout action
+import { fetchStock, useIngredients } from "../../Redux/Slices/stockSlice";
+import { logout } from "../../Redux/Slices/authSlice";
 import axios from "axios";
 import { toast } from "react-toastify";
-import { useNavigate } from "react-router-dom"; // ✅ for redirect after logout
+import { useNavigate } from "react-router-dom";
 import ManageStock from "./ManageStock";
-import ResponsiveLayout from "../../Components/Layout/ResponsiveLayout";
 
-const { Sider, Content } = Layout;
+const { Sider, Content, Header } = Layout;
 const { Search } = Input;
 
 const KitchenDashboard = () => {
   const dispatch = useDispatch();
-  const navigate = useNavigate(); // ✅ initialize navigation
+  const navigate = useNavigate();
 
   const orders = useSelector((state) => state.orders.orders || []);
   const stockItems = useSelector((state) => state.stock.stockItems || []);
@@ -51,7 +48,18 @@ const KitchenDashboard = () => {
   const [tableFilter, setTableFilter] = useState(null);
   const [elapsedTimes, setElapsedTimes] = useState({});
 
-  // 🔹 Fetch orders & stock periodically
+  const [isMobile, setIsMobile] = useState(false);
+  const [drawerVisible, setDrawerVisible] = useState(false);
+
+  // Detect screen size
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 768);
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  // Fetch orders & stock periodically
   useEffect(() => {
     dispatch(fetchOrders());
     dispatch(fetchStock());
@@ -62,7 +70,7 @@ const KitchenDashboard = () => {
     return () => clearInterval(interval);
   }, [dispatch]);
 
-  // 🔹 Track cooking durations
+  // Track cooking durations
   useEffect(() => {
     const interval = setInterval(() => {
       const newElapsed = {};
@@ -89,7 +97,6 @@ const KitchenDashboard = () => {
     return () => clearInterval(interval);
   }, [orders]);
 
-  // 🔹 Handle order status updates
   const handleStatusUpdate = async (order) => {
     let newStatus;
 
@@ -102,9 +109,7 @@ const KitchenDashboard = () => {
 
         await axios.post(
           "https://restaurant-backend-kiran.up.railway.app/api/stock/reduce",
-          {
-            items: orderItems,
-          }
+          { items: orderItems }
         );
         dispatch(useIngredients({ ingredients: orderItems }));
         toast.success("Stock reduced for cooking order");
@@ -134,24 +139,19 @@ const KitchenDashboard = () => {
     try {
       await axios.patch(
         `https://restaurant-backend-kiran.up.railway.app/api/orders/${order.id}/status`,
-        {
-          status: newStatus,
-          staff_id: order.staff_id || null,
-        }
+        { status: newStatus, staff_id: order.staff_id || null }
       );
     } catch (error) {
       console.error("Failed to update order:", error);
     }
   };
 
-  // 🔹 Logout handler
   const handleLogout = () => {
     dispatch(logout());
     toast.success("Logged out successfully!");
-    navigate("/"); // ✅ redirect to home
+    navigate("/");
   };
 
-  // 🔹 Table columns
   const orderColumns = [
     {
       title: "Table",
@@ -209,20 +209,32 @@ const KitchenDashboard = () => {
       title: "Actions",
       key: "actions",
       render: (_, record) => (
-        <Space>
+        <Space wrap>
           {(record.status === "Pending" ||
             record.status === "Started Preparing") && (
-            <Button type="primary" onClick={() => handleStatusUpdate(record)}>
+            <Button
+              type="primary"
+              size={isMobile ? "small" : "middle"}
+              onClick={() => handleStatusUpdate(record)}
+            >
               Start Cooking
             </Button>
           )}
           {record.status === "Cooking" && (
-            <Button type="default" onClick={() => handleStatusUpdate(record)}>
+            <Button
+              type="default"
+              size={isMobile ? "small" : "middle"}
+              onClick={() => handleStatusUpdate(record)}
+            >
               Mark Ready
             </Button>
           )}
           {record.status === "Ready" && (
-            <Button type="dashed" onClick={() => handleStatusUpdate(record)}>
+            <Button
+              type="dashed"
+              size={isMobile ? "small" : "middle"}
+              onClick={() => handleStatusUpdate(record)}
+            >
               Complete
             </Button>
           )}
@@ -253,26 +265,26 @@ const KitchenDashboard = () => {
     if (selectedMenu === "orders") {
       return (
         <>
-          <Row gutter={16} style={{ marginBottom: 20 }}>
-            <Col span={6}>
+          <Row gutter={[16, 16]}>
+            <Col xs={12} sm={12} md={6}>
               <Card>Total Orders: {totalOrders}</Card>
             </Col>
-            <Col span={6}>
+            <Col xs={12} sm={12} md={6}>
               <Card>Cooking: {cookingOrders}</Card>
             </Col>
-            <Col span={6}>
+            <Col xs={12} sm={12} md={6}>
               <Card>Ready: {readyOrders}</Card>
             </Col>
-            <Col span={6}>
+            <Col xs={12} sm={12} md={6}>
               <Card>Completed: {completedOrders}</Card>
             </Col>
           </Row>
-
-          <Row gutter={16} style={{ marginBottom: 20 }}>
+          <br></br>
+          <Row gutter={[8, 8]} wrap style={{ marginBottom: 20 }}>
             <Col>
               <Select
                 placeholder="Filter by status"
-                style={{ width: 150 }}
+                style={{ width: isMobile ? 120 : 150 }}
                 value={statusFilter}
                 onChange={setStatusFilter}
                 allowClear
@@ -288,7 +300,7 @@ const KitchenDashboard = () => {
             <Col>
               <Search
                 placeholder="Filter by Staff"
-                style={{ width: 250 }}
+                style={{ width: isMobile ? 150 : 250 }}
                 allowClear
                 onChange={(e) => setStaffFilter(e.target.value)}
               />
@@ -296,7 +308,7 @@ const KitchenDashboard = () => {
             <Col>
               <Select
                 placeholder="Filter by Table"
-                style={{ width: 150 }}
+                style={{ width: isMobile ? 120 : 150 }}
                 value={tableFilter}
                 onChange={setTableFilter}
                 allowClear
@@ -319,19 +331,34 @@ const KitchenDashboard = () => {
             dataSource={filteredOrders}
             rowKey="id"
             pagination={false}
+            scroll={{ x: 800 }}
           />
         </>
       );
     }
 
-    if (selectedMenu === "stock") {
-      return <ManageStock />;
-    }
+    if (selectedMenu === "stock") return <ManageStock />;
   };
 
+  const menuContent = (
+    <Menu
+      mode="inline"
+      selectedKeys={[selectedMenu]}
+      onClick={(e) => {
+        setSelectedMenu(e.key);
+        if (isMobile) setDrawerVisible(false);
+      }}
+      items={[
+        { key: "orders", icon: <OrderedListOutlined />, label: "Orders" },
+        { key: "stock", icon: <DatabaseOutlined />, label: "Stock Monitor" },
+      ]}
+    />
+  );
+
   return (
-    <ResponsiveLayout>
-      <Layout style={{ minHeight: "100vh" }}>
+    <Layout style={{ minHeight: "100vh" }}>
+      {/* Desktop Sidebar */}
+      {!isMobile && (
         <Sider
           theme="light"
           width={220}
@@ -353,26 +380,8 @@ const KitchenDashboard = () => {
             >
               Kitchen Panel
             </div>
-            <Menu
-              mode="inline"
-              defaultSelectedKeys={["orders"]}
-              onClick={(e) => setSelectedMenu(e.key)}
-              items={[
-                {
-                  key: "orders",
-                  icon: <OrderedListOutlined />,
-                  label: "Orders",
-                },
-                {
-                  key: "stock",
-                  icon: <DatabaseOutlined />,
-                  label: "Stock Monitor",
-                },
-              ]}
-            />
+            {menuContent}
           </div>
-
-          {/* 🔹 Logout button at bottom */}
           <div style={{ padding: "16px", borderTop: "1px solid #eee" }}>
             <Button
               type="primary"
@@ -385,12 +394,56 @@ const KitchenDashboard = () => {
             </Button>
           </div>
         </Sider>
+      )}
 
-        <Layout>
-          <Content style={{ padding: 20 }}>{renderContent()}</Content>
-        </Layout>
+      <Layout>
+        {/* Mobile Header */}
+        {isMobile && (
+          <Header
+            style={{
+              background: "#fff",
+              padding: "0 16px",
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              borderBottom: "1px solid #eee",
+            }}
+          >
+            <Button
+              type="text"
+              icon={<MenuOutlined />}
+              onClick={() => setDrawerVisible(true)}
+            />
+            <div style={{ fontWeight: "bold" }}>Kitchen Panel</div>
+            <Button
+              type="primary"
+              danger
+              size="small"
+              onClick={handleLogout}
+              icon={<LogoutOutlined />}
+            />
+          </Header>
+        )}
+
+        {/* Drawer for mobile menu */}
+        <Drawer
+          title="Kitchen Panel"
+          placement="left"
+          closable={true}
+          onClose={() => setDrawerVisible(false)}
+          open={drawerVisible}
+          bodyStyle={{ padding: 0 }}
+        >
+          {menuContent}
+        </Drawer>
+
+        <Content
+          style={{ padding: 16, background: "#fff", minHeight: "100vh" }}
+        >
+          {renderContent()}
+        </Content>
       </Layout>
-    </ResponsiveLayout>
+    </Layout>
   );
 };
 

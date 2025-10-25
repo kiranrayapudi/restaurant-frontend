@@ -14,7 +14,9 @@ const ContactsAdmin = () => {
   const fetchContacts = async () => {
     setLoading(true);
     try {
-      const res = await axios.get("http://localhost:5000/api/contacts");
+      const res = await axios.get(
+        "https://restaurant-backend-kiran.up.railway.app/api/contacts"
+      );
       setContacts(res.data.contacts || []);
     } catch (err) {
       console.error("Fetch Contacts Error:", err);
@@ -100,6 +102,10 @@ const ContactsAdmin = () => {
             rowKey="id"
             bordered
             pagination={{ pageSize: 5 }}
+            scroll={{
+              x: 800, // horizontal scroll width (adjust if needed)
+              y: window.innerWidth < 768 ? 400 : undefined, // vertical scroll only on mobile
+            }}
           />
         )}
       </div>

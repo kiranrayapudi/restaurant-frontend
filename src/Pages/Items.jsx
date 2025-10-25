@@ -162,6 +162,7 @@ const ItemsPage = () => {
           dataSource={items}
           rowKey="item_id"
           pagination={{ pageSize: 5 }}
+          scroll={{ x: 700 }}
         />
       </Card>
 

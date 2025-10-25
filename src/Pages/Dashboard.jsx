@@ -27,6 +27,14 @@ const Dashboard = () => {
   const [menuStock, setMenuStock] = useState([]);
   const [revenueTrend, setRevenueTrend] = useState([]);
   const [ordersTrend, setOrdersTrend] = useState([]);
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 768);
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -174,7 +182,7 @@ const Dashboard = () => {
             style={{ borderRadius: 8 }}
           >
             <Title level={3}>₹ {revenueToday.toFixed(2)}</Title>
-            <ResponsiveContainer width="100%" height={200}>
+            <ResponsiveContainer width="100%" height={isMobile ? 180 : 200}>
               <LineChart data={revenueTrend}>
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="date" tickFormatter={(d) => d.slice(5)} />

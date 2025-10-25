@@ -105,7 +105,12 @@ const TablesPage = () => {
         </Button>
       </Space>
 
-      <Table dataSource={tables} columns={columns} rowKey="id" />
+      <Table
+        dataSource={tables}
+        columns={columns}
+        rowKey="id"
+        scroll={{ x: 500 }}
+      />
     </AppLayout>
   );
 };

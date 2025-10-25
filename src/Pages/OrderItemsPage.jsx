@@ -172,6 +172,7 @@ const OrderItemsPage = () => {
           dataSource={orders}
           rowKey="id"
           pagination={false}
+          scroll={{ x: 900 }}
         />
       </Card>
 

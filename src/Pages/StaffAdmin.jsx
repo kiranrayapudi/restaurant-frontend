@@ -15,6 +15,7 @@ import {
   Select,
   message,
   Popconfirm,
+  Space,
 } from "antd";
 import { toast } from "react-toastify";
 import AppLayout from "../Components/Layout/AppLayout";
@@ -34,6 +35,13 @@ const StaffAdmin = () => {
   const [modalVisible, setModalVisible] = useState(false);
   const [editingStaff, setEditingStaff] = useState(null);
   const [form] = Form.useForm();
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   useEffect(() => {
     dispatch(fetchStaff());
@@ -92,20 +100,15 @@ const StaffAdmin = () => {
       dataIndex: "status",
       key: "status",
       render: (status) => (
-        <Tag
-          color={status === "Active" ? "green" : "red"}
-          style={{ fontWeight: 600 }}
-        >
-          {status}
-        </Tag>
+        <Tag color={status === "Active" ? "green" : "red"}>{status}</Tag>
       ),
     },
     {
       title: "Actions",
       key: "actions",
       render: (_, record) => (
-        <div style={{ display: "flex", gap: 8 }}>
-          <Button size="small" onClick={() => openModal(record)}>
+        <Space direction={isMobile ? "vertical" : "horizontal"}>
+          <Button size="small" onClick={() => openModal(record)} block>
             Edit
           </Button>
           <Popconfirm
@@ -114,11 +117,11 @@ const StaffAdmin = () => {
             okText="Yes"
             cancelText="No"
           >
-            <Button size="small" danger>
+            <Button size="small" danger block>
               Delete
             </Button>
           </Popconfirm>
-        </div>
+        </Space>
       ),
     },
   ];
@@ -176,11 +179,20 @@ const StaffAdmin = () => {
             rowKey="id"
             pagination={{ pageSize: 5 }}
             bordered
+            scroll={
+              window.innerWidth < 768 ? { x: "max-content", y: 400 } : undefined
+            }
           />
         </Card>
 
         <Modal
-          title={editingStaff ? "Edit Staff" : "Add New Staff"}
+          title={
+            <div
+              style={{ textAlign: isMobile ? "right" : "left", width: "100%" }}
+            >
+              {editingStaff ? "Edit Staff" : "Add New Staff"}
+            </div>
+          }
           open={modalVisible}
           onCancel={() => setModalVisible(false)}
           footer={null}

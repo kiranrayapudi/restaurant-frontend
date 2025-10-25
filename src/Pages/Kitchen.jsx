@@ -1,6 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { Table, Card, Row, Col, Statistic, Spin, Tag } from "antd";
-import { PieChart, Pie, Cell, Tooltip, Legend } from "recharts";
+import {
+  PieChart,
+  Pie,
+  Cell,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+} from "recharts";
 import { useDispatch, useSelector } from "react-redux";
 import AppLayout from "../Components/Layout/AppLayout";
 import { fetchOrders } from "../Redux/Slices/orderSlice";
@@ -12,24 +19,20 @@ const KitchenDashboardAdmin = () => {
   const orders = useSelector((state) => state.orders.orders || []);
   const [loading, setLoading] = useState(true);
   const [elapsedTimes, setElapsedTimes] = useState({});
-  // Define which statuses are considered for each category
+
   const pendingStatuses = ["Started Preparing"];
   const preparingStatuses = ["Cooking", "Ready"];
   const completedStatuses = ["Completed"];
 
-  // Calculate counts
   const pendingCount = orders.filter((o) =>
     pendingStatuses.includes(o.status)
   ).length;
-
   const preparingCount = orders.filter((o) =>
     preparingStatuses.includes(o.status)
   ).length;
-
   const completedCount = orders.filter((o) =>
     completedStatuses.includes(o.status)
   ).length;
-
   const totalOrders = orders.length;
 
   useEffect(() => {
@@ -40,11 +43,10 @@ const KitchenDashboardAdmin = () => {
     };
 
     loadOrders();
-    const interval = setInterval(loadOrders, 50000); // auto-refresh every 5s
+    const interval = setInterval(loadOrders, 50000);
     return () => clearInterval(interval);
   }, [dispatch]);
 
-  // Live elapsed timers
   useEffect(() => {
     const interval = setInterval(() => {
       const newElapsed = {};
@@ -95,7 +97,7 @@ const KitchenDashboardAdmin = () => {
           arr = [];
         }
         return (
-          <ul>
+          <ul style={{ paddingLeft: "15px", margin: 0 }}>
             {arr.map((item, i) =>
               typeof item === "string" ? (
                 <li key={i}>{item}</li>
@@ -172,13 +174,10 @@ const KitchenDashboardAdmin = () => {
     },
   ];
 
-  const statusCount = (Array.isArray(orders) ? orders : []).reduce(
-    (acc, order) => {
-      acc[order.status] = (acc[order.status] || 0) + 1;
-      return acc;
-    },
-    {}
-  );
+  const statusCount = orders.reduce((acc, order) => {
+    acc[order.status] = (acc[order.status] || 0) + 1;
+    return acc;
+  }, {});
 
   const pieData = Object.entries(statusCount).map(([key, value]) => ({
     name: key,
@@ -189,14 +188,8 @@ const KitchenDashboardAdmin = () => {
     <AppLayout>
       <style>
         {`
-          @keyframes blink {
-            0% { opacity: 1; }
-            50% { opacity: 0.4; }
-            100% { opacity: 1; }
-          }
-          .blinking-status {
-            animation: blink 1s infinite;
-          }
+          @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0.4; } 100% { opacity: 1; } }
+          .blinking-status { animation: blink 1s infinite; }
         `}
       </style>
 
@@ -204,8 +197,8 @@ const KitchenDashboardAdmin = () => {
         <h2 style={{ fontWeight: 600 }}>🍳 Kitchen Dashboard (Admin View)</h2>
 
         {/* Summary Cards */}
-        <Row gutter={16} style={{ marginBottom: "20px" }}>
-          <Col span={6}>
+        <Row gutter={[16, 16]} style={{ marginBottom: "20px" }}>
+          <Col xs={12} sm={6}>
             <Card>
               <Statistic
                 title="Total Orders"
@@ -214,7 +207,7 @@ const KitchenDashboardAdmin = () => {
               />
             </Card>
           </Col>
-          <Col span={6}>
+          <Col xs={12} sm={6}>
             <Card>
               <Statistic
                 title="Pending Orders"
@@ -223,7 +216,7 @@ const KitchenDashboardAdmin = () => {
               />
             </Card>
           </Col>
-          <Col span={6}>
+          <Col xs={12} sm={6}>
             <Card>
               <Statistic
                 title="Preparing Orders"
@@ -232,7 +225,7 @@ const KitchenDashboardAdmin = () => {
               />
             </Card>
           </Col>
-          <Col span={6}>
+          <Col xs={12} sm={6}>
             <Card>
               <Statistic
                 title="Completed Orders"
@@ -244,30 +237,36 @@ const KitchenDashboardAdmin = () => {
         </Row>
 
         {/* Pie Chart + Table */}
-        <Row gutter={24}>
-          <Col span={8}>
+        <Row gutter={[16, 16]}>
+          <Col xs={24} md={8}>
             <Card title="Order Status Overview" bordered={false}>
-              <PieChart width={300} height={300}>
-                <Pie
-                  data={pieData}
-                  dataKey="value"
-                  nameKey="name"
-                  cx="50%"
-                  cy="50%"
-                  outerRadius={100}
-                  label
-                >
-                  {pieData.map((entry, index) => (
-                    <Cell key={index} fill={COLORS[index % COLORS.length]} />
-                  ))}
-                </Pie>
-                <Tooltip />
-                <Legend />
-              </PieChart>
+              <div style={{ width: "100%", height: 300, minHeight: 300 }}>
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={pieData}
+                      dataKey="value"
+                      cx="50%"
+                      cy="50%"
+                      outerRadius={80}
+                      label={({ value }) => value} // only show values
+                    >
+                      {pieData.map((entry, index) => (
+                        <Cell
+                          key={index}
+                          fill={COLORS[index % COLORS.length]}
+                        />
+                      ))}
+                    </Pie>
+                    <Tooltip />
+                    <Legend verticalAlign="bottom" height={36} />
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
             </Card>
           </Col>
 
-          <Col span={16}>
+          <Col xs={24} md={16}>
             {loading ? (
               <Spin size="large" />
             ) : (
@@ -277,6 +276,7 @@ const KitchenDashboardAdmin = () => {
                 rowKey="id"
                 bordered
                 pagination={{ pageSize: 5 }}
+                scroll={{ x: "max-content" }} // horizontal scroll for mobile
               />
             )}
           </Col>

@@ -204,6 +204,7 @@ const MenuItems = () => {
           columns={columns}
           rowKey="id"
           pagination={{ pageSize: 8 }}
+          scroll={{ x: 1000 }}
         />
       )}
 

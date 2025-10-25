@@ -55,6 +55,7 @@ const ManageStock = () => {
           dataSource={stockItems}
           rowKey="item_id"
           pagination={false}
+          scroll={{ x: 600 }}
         />
       </Card>
     </div>

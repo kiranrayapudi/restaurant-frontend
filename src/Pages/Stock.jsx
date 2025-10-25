@@ -362,23 +362,38 @@ const StockPage = () => {
 
         {/* Stock Table */}
         <Card
-          title={<Title level={4}>📊 Current Stock Overview</Title>}
-          extra={
-            <Button
-              type="primary"
-              icon={<PlusOutlined />}
-              onClick={() => setIsModalVisible(true)}
-            >
-              Add Stock
-            </Button>
-          }
           style={{ borderRadius: 10 }}
+          bodyStyle={{ padding: 16 }}
+          title={
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "row",
+                justifyContent: "space-between",
+                alignItems: "center",
+                flexWrap: "wrap", // this ensures it wraps on small screens
+                gap: 8,
+              }}
+            >
+              <Title level={4} style={{ margin: 0 }}>
+                📊 Current Stock Overview
+              </Title>
+              <Button
+                type="primary"
+                icon={<PlusOutlined />}
+                onClick={() => setIsModalVisible(true)}
+              >
+                Add Stock
+              </Button>
+            </div>
+          }
         >
           <Table
             columns={columns}
             dataSource={stocks}
             rowKey="id"
             pagination={{ pageSize: 5 }}
+            scroll={{ x: 1000 }}
           />
         </Card>
 
